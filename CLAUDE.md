@@ -53,20 +53,38 @@ moneylog からは**概念のみ**継承。元のバニラ HTML/CSS/JS の実装
 
 ### dev 起動
 
-<TODO: 設計確定後にコマンド記載>
+```
+npm install
+cp .env.example .env   # 値を埋める (BETTER_AUTH_*, GOOGLE_*, SMTP_*)
+npm run db:migrate     # ローカル SQLite に schema 適用 (本番は起動時 auto-migrate)
+npm run dev            # concurrently: server tsx(:8080) + vite client(:5173)
+```
+client `http://localhost:5173` → `/api` は :8080 へ proxy。
 
 ### テスト
 
-<TODO: Reviewer がテスト基盤定義後>
+```
+npx vitest run         # Vitest 4。tests/ (API/描画) + src/**/__tests__ (純関数)。32件
+```
+`vitest.config.ts` は `fileParallelism:false` (test DB が DATABASE_URL グローバル上書きのため並列不可)。
 
-### デプロイ
+### デプロイ (appily / Coolify)
 
-<TODO: appily SKILL 使用、Coolify uuid 取得後追記>
+main へ push 後、Coolify API で deploy をキック (auto-deploy webhook 未設定):
+```
+curl -sS -H "Authorization: Bearer $COOLIFY_API_TOKEN" \
+  "$COOLIFY_API_BASE/deploy?uuid=s4b61u855k6uqazep1brr00z&force=false"
+```
+- 単一コンテナ (Dockerfile)。Hono が API + 静的 client (`SERVE_STATIC=1`) を :8080 で配信。起動時に drizzle migration 自動適用。
+- **新規/再作成時は必ず `is_force_https_enabled=false` + `redirect:both`**。それでも全パス 307 self-loop なら **fqdn 削除→redeploy(404確認)→戻し→redeploy** で Traefik label 再生成 ([[gotcha/coolify-traefik-stale-label-loop]])。今回これで復旧。
 
 ## デプロイ / 外部リソース
 
-- URL: <https://kinketsu-taisaku.appily.run> (予定)
-- Coolify app uuid: <TODO: デプロイ時>
+- URL: <https://kinketsu-taisaku.appily.run> (本番稼働中)
+- GitHub: <https://github.com/ait913/kinketsu-taisaku> (public)
+- Coolify app uuid: `s4b61u855k6uqazep1brr00z` / project `nkaqu9lx6xewvzsvkadnmjcf` (Touri) / server `gr24emlhaecs4tfw0f4gzoct` (localhost)
+- 永続ストレージ: named volume `kinketsu-data` → `/app/data` (SQLite `DATABASE_URL=/app/data/kinketsu.db`)
+- env (Coolify 設定済): BETTER_AUTH_URL/SECRET, GOOGLE_CLIENT_ID/SECRET, RESEND via SMTP (SMTP_HOST=smtp.resend.com / USER=resend / PASS=Resend APIキー / FROM="金欠対策 <noreply@appily.run>"), SERVE_STATIC=1, PORT=8080, ALLOWED_ORIGINS
+- 認証: Google OAuth = E2E 配線確認済 (accounts.google.com 到達)。Magic Link = Resend SMTP 経由。**From の appily.run が Resend 検証済みである必要あり** (未検証なら onboarding@resend.dev へ差し替え)
 - 関連 SKILL: [`appily`](../../.claude/skills/appily/SKILL.md)
-- 認証インフラ依存: Magic Link 用 SMTP/メール送信、Google OAuth client (Google Cloud) <TODO: 設定>
 - 参考元アプリ (概念): moneylog <https://app.ceez7.com/moneylog/> (ceez7 ログイン要)
