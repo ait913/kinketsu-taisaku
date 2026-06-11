@@ -1,12 +1,13 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { authClient } from "../api/auth";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 const tabs = [
-  { to: "/", label: "月" },
-  { to: "/trend", label: "推移" },
-  { to: "/recurring", label: "定期" },
-  { to: "/settings", label: "設定" },
+  { to: "/", label: "月", slug: "month" },
+  { to: "/trend", label: "推移", slug: "trend" },
+  { to: "/recurring", label: "定期", slug: "recurring" },
+  { to: "/settings", label: "設定", slug: "settings" },
 ] as const;
 
 export function AppShell() {
@@ -25,15 +26,22 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <strong>金欠対策</strong>
-        <nav>{tabs.map((tab) => <Link key={tab.to} to={tab.to} activeProps={{ className: "active" }}>{tab.label}</Link>)}</nav>
+      <aside className="sidebar" data-testid="sidebar">
+        <div className="brand"><span className="brand-mark" /><strong>金欠対策</strong></div>
+        <nav>{tabs.map((tab) => <Link key={tab.to} to={tab.to} data-testid={`nav-${tab.slug}`} activeProps={{ className: "active" }}>{tab.label}</Link>)}</nav>
+        <div className="sidebar-footer">
+          <ThemeToggle />
+          <p className="account-email">{session.data?.user.email}</p>
+          <button className="logout-button" onClick={() => void authClient.signOut()}>ログアウト</button>
+        </div>
       </aside>
-      <main className="screen">
-        <Outlet />
-      </main>
-      <nav className="bottom-tabs">
-        {tabs.map((tab) => <Link key={tab.to} to={tab.to} activeProps={{ className: "active" }}>{tab.label}</Link>)}
+      <div className="content-col">
+        <main className="screen">
+          <Outlet />
+        </main>
+      </div>
+      <nav className="bottom-tabs" data-testid="bottom-tabs">
+        {tabs.map((tab) => <Link key={tab.to} to={tab.to} data-testid={`nav-${tab.slug}`} activeProps={{ className: "active" }}>{tab.label}</Link>)}
       </nav>
     </div>
   );

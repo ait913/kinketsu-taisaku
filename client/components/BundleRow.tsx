@@ -11,8 +11,9 @@ export type BundleRowProps = {
 
 export function BundleRow({ bundle, expanded, onToggle, children }: BundleRowProps) {
   return (
-    <div>
-      <button data-testid="bundle-row" className="row-button" onClick={() => onToggle(bundle.description)}>
+    <div className="bundle-group">
+      <button data-testid="bundle-row" className="row-button bundle-row" onClick={() => onToggle(bundle.description)}>
+        <span className="bundle-caret">{expanded ? "▾" : "▸"}</span>
         <span className="row-main">
           <span className="row-title">{bundle.description} ({bundle.count})</span>
           <span className="row-meta">bundle</span>

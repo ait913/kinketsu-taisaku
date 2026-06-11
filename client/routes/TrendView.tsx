@@ -20,22 +20,29 @@ export function TrendView() {
   const todayIndex = trend.data?.points.findIndex((p) => p.confirmed === null);
 
   return (
-    <section>
+    <section className="view-stack">
+      <header className="toolbar"><h1>推移</h1></header>
       <div className="segmented"><button className={mode === "month" ? "active" : ""} onClick={() => setMode("month")}>当月推移</button><button className={mode === "forecast" ? "active" : ""} onClick={() => setMode("forecast")}>多月予測</button></div>
       {mode === "month" && trend.data && (
-        <LineChart height={220} todayIndex={todayIndex && todayIndex > 0 ? todayIndex - 1 : undefined} xLabels={trend.data.points.map((p) => p.date.slice(8))} series={[
-          { id: "confirmed", color: "#0f766e", points: trend.data.points.map((p, x) => ({ x, y: p.confirmed })) },
-          { id: "forecast", color: "#64748b", dashed: true, points: trend.data.points.map((p, x) => ({ x, y: p.forecast })) },
-        ]} />
+        <section className="chart-card">
+          <header className="chart-header"><strong>当月残高推移</strong><div data-testid="chart-legend" className="chart-legend"><span><i className="legend-confirmed" />確定</span><span><i className="legend-forecast" />着地予測</span></div></header>
+          <LineChart height={220} todayIndex={todayIndex && todayIndex > 0 ? todayIndex - 1 : undefined} xLabels={trend.data.points.map((p) => p.date.slice(8))} series={[
+            { id: "confirmed", color: "var(--color-info)", points: trend.data.points.map((p, x) => ({ x, y: p.confirmed })) },
+            { id: "forecast", color: "var(--color-brand)", dashed: true, points: trend.data.points.map((p, x) => ({ x, y: p.forecast })) },
+          ]} />
+        </section>
       )}
       {mode === "forecast" && forecast.data && (
         <>
-          <LineChart height={220} xLabels={forecast.data.series.map((p) => p.yearMonth)} series={[
-            { id: "confirmed", color: "#0f766e", points: forecast.data.series.map((p, x) => ({ x, y: p.endingBalanceConfirmed })) },
-            { id: "forecast", color: "#64748b", dashed: true, points: forecast.data.series.map((p, x) => ({ x, y: p.endingBalanceForecast })) },
-          ]} />
+          <section className="chart-card">
+            <header className="chart-header"><strong>多月着地予測</strong><div data-testid="chart-legend" className="chart-legend"><span><i className="legend-confirmed" />確定</span><span><i className="legend-forecast" />着地予測</span></div></header>
+            <LineChart height={220} xLabels={forecast.data.series.map((p) => p.yearMonth)} series={[
+              { id: "confirmed", color: "var(--color-info)", points: forecast.data.series.map((p, x) => ({ x, y: p.endingBalanceConfirmed })) },
+              { id: "forecast", color: "var(--color-brand)", dashed: true, points: forecast.data.series.map((p, x) => ({ x, y: p.endingBalanceForecast })) },
+            ]} />
+          </section>
           <div className="month-count">{[3, 6, 12].map((n) => <button key={n} onClick={() => setMonths(n)} className={months === n ? "active" : ""}>{n}</button>)}</div>
-          <div className="list">{forecast.data.series.map((m) => <div className="month-card" key={m.yearMonth}><strong>{m.yearMonth}</strong><span>{yen(m.endingBalanceForecast)}</span><small>収{yen(m.incomeForecast)} 支{yen(m.expenseForecast)}</small></div>)}</div>
+          <div className="month-card-grid">{forecast.data.series.map((m) => <div className="month-card" key={m.yearMonth}><strong>{m.yearMonth}</strong><span>{yen(m.endingBalanceForecast)}</span><small><span className="income">収{yen(m.incomeForecast)}</span> <span className="expense">支{yen(m.expenseForecast)}</span></small></div>)}</div>
         </>
       )}
     </section>

@@ -18,7 +18,7 @@ export function Login() {
           setSent(true);
         }}>ログインリンクを送信</button>
         <button className="secondary" onClick={() => void authClient.signIn.social({ provider: "google", callbackURL: "/" })}>Google でログイン</button>
-        {sent && <p>メールを確認してください</p>}
+        {sent && <p className="notice">メールを確認してください</p>}
       </section>
     </main>
   );

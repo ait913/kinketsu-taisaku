@@ -2,7 +2,16 @@ import { useEffect, useState } from "react";
 import type { CategoryDTO, TagDTO, TagInput } from "../api/types";
 import { Sheet } from "./Sheet";
 
-const palette = ["#14b8a6", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899", "#f97316", "#eab308", "#64748b"];
+const palette = [
+  "var(--color-brand)",
+  "var(--color-success)",
+  "var(--color-info)",
+  "var(--color-warning)",
+  "var(--color-danger)",
+  "var(--color-text-muted)",
+  "var(--color-border-strong)",
+  "var(--color-border)",
+];
 
 type TagSheetProps = {
   open: boolean;

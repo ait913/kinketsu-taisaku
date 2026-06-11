@@ -6,6 +6,7 @@ import { BundleRow } from "../components/BundleRow";
 import { RecordSheet } from "../components/RecordSheet";
 import { RecordRow } from "../components/RecordRow";
 import { SummaryCard } from "../components/SummaryCard";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 type MonthData = {
   yearMonth: string;
@@ -82,13 +83,18 @@ export function MonthView() {
   }
 
   const data = month.data;
+  const visibleRecords = data?.records.filter((record) => !bundleOn || !data.bundles.some((bundle) => bundle.recordIds.includes(record.id))) ?? [];
   return (
-    <section>
-      <header className="topbar"><button>‹</button><strong>{yearMonth}</strong><button>›</button></header>
-      {message && <p className="notice error">{message}</p>}
+    <section className="view-stack month-view">
+      <header className="toolbar">
+        <div className="month-switcher"><button aria-label="前月">‹</button><strong>{yearMonth}</strong><button aria-label="翌月">›</button></div>
+        <div className="toolbar-actions"><ThemeToggle /><button className="primary desktop-action" onClick={openNew}>＋ 記録を追加</button></div>
+      </header>
+      {message && <p className="notice error" data-testid="toast">{message}</p>}
       {data && <SummaryCard currentBalance={data.currentBalance} endingBalanceForecast={data.endingBalanceForecast} incomeForecast={data.totals.incomeForecast} expenseForecast={data.totals.expenseForecast} />}
       <label className="toggle"><input type="checkbox" checked={bundleOn} onChange={(e) => setBundleOn(e.target.checked)} /> bundle で表示</label>
-      <div className="list">
+      <div className="record-list data-grid">
+        <div className="record-head" aria-hidden="true"><span /><span>日付</span><span>説明 / カテゴリ</span><span>状態</span><span>金額</span></div>
         {bundleOn && data?.bundles.map((bundle) => (
           <BundleRow key={bundle.description} bundle={bundle} expanded={expanded === bundle.description} onToggle={(d) => setExpanded(expanded === d ? null : d)}>
             {data.records.filter((r) => bundle.recordIds.includes(r.id)).map((record) => (
@@ -96,11 +102,10 @@ export function MonthView() {
             ))}
           </BundleRow>
         ))}
-        {data?.records
-          .filter((record) => !bundleOn || !data.bundles.some((bundle) => bundle.recordIds.includes(record.id)))
-          .map((record) => (
-            <RecordRow key={record.id} record={record} tag={tags.data?.find((t) => t.id === record.tagId) ?? null} category={categories.data?.find((cat) => cat.id === record.categoryId) ?? { id: record.categoryId, name: "", signMode: "free", isSystem: false, sortOrder: 0 }} onClick={openEdit} />
-          ))}
+        {visibleRecords.map((record) => (
+          <RecordRow key={record.id} record={record} tag={tags.data?.find((t) => t.id === record.tagId) ?? null} category={categories.data?.find((cat) => cat.id === record.categoryId) ?? { id: record.categoryId, name: "", signMode: "free", isSystem: false, sortOrder: 0 }} onClick={openEdit} />
+        ))}
+        {data && data.records.length === 0 && <div data-testid="empty-records" className="empty-state">この月の記録はまだありません</div>}
       </div>
       <button className="fab" onClick={openNew}>＋</button>
       <RecordSheet
