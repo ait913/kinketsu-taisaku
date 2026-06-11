@@ -127,6 +127,8 @@ select:focus-visible {
 .sheet button[data-testid="sheet-action"]:hover,
 .secondary:hover { background: var(--color-surface-2); }
 .primary,
+button.primary,
+.toolbar button.primary,
 .login-panel button:first-of-type,
 .sheet button[data-testid="sheet-action"] {
   border-color: transparent;
@@ -134,6 +136,8 @@ select:focus-visible {
   color: #fff;
 }
 .primary:hover,
+button.primary:hover,
+.toolbar button.primary:hover,
 .login-panel button:first-of-type:hover,
 .sheet button[data-testid="sheet-action"]:hover { background: var(--color-brand-hover); }
 .desktop-action { display: none; }
