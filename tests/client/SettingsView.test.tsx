@@ -100,7 +100,7 @@ describe("SettingsView (§11.8)", () => {
     render(<SettingsView />);
 
     const ruleSection = screen.getByText("定期ルール").closest("section") as HTMLElement;
-    await user.click(within(ruleSection).getByText("＋追加"));
+    await user.click(within(ruleSection).getByText("追加"));
     expect(screen.getByTestId("sheet")).toBeInTheDocument();
     expect(screen.getByText("定期を追加")).toBeInTheDocument();
 

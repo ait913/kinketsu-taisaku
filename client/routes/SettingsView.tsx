@@ -9,6 +9,7 @@ import { ControlBar } from "../components/ControlBar";
 import { RuleSheet } from "../components/RuleSheet";
 import { TagSheet } from "../components/TagSheet";
 import { yen } from "../components/format";
+import { Plus } from "lucide-react";
 
 function currentYearMonth() {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit" }).format(new Date());
@@ -202,7 +203,7 @@ export function SettingsView() {
       <ControlBar variant="settings" onBack={() => void navigate({ to: "/" })} />
       {message && <p className="notice error" data-testid="toast">{message}</p>}
       <section className="card">
-        <header className="section-header"><h2>定期ルール</h2><button className="soft-button press" onClick={() => openRule(null)}>＋追加</button></header>
+        <header className="section-header"><h2>定期ルール</h2><button className="soft-button press" onClick={() => openRule(null)}><Plus size={16} />追加</button></header>
         <div className="soft-list">
           {rules.data?.map((rule) => (
             <button key={rule.id} className={`soft-row row-link ${rule.active ? "" : "is-unpaid"}`} onClick={() => openRule(rule)}>
@@ -218,11 +219,11 @@ export function SettingsView() {
         </div>
       </section>
       <section className="card">
-        <header className="section-header"><h2>カテゴリ管理</h2><button onClick={() => openCategory(null)}>＋追加</button></header>
+        <header className="section-header"><h2>カテゴリ管理</h2><button onClick={() => openCategory(null)}><Plus size={16} />追加</button></header>
         {categories.data?.map((cat) => <button className="setting-row row-link" key={cat.id} onClick={() => openCategory(cat)}><span>{cat.name}</span>{cat.isSystem && <span className="badge">システム</span>}</button>)}
       </section>
       <section className="card">
-        <header className="section-header"><h2>タグ管理</h2><button onClick={() => openTag(null)}>＋追加</button></header>
+        <header className="section-header"><h2>タグ管理</h2><button onClick={() => openTag(null)}><Plus size={16} />追加</button></header>
         {categories.data?.map((category) => {
           const group = tags.data?.filter((tag) => tag.categoryId === category.id) ?? [];
           if (group.length === 0) return null;
@@ -232,15 +233,15 @@ export function SettingsView() {
       <section className="card">
         <h2>初期残高アンカー</h2>
         <div className="inline-form">
-          <label className="field">残高<input inputMode="numeric" type="number" step="1" value={anchorBalance} onChange={(event) => setAnchorBalance(event.target.value)} /></label>
-          <label className="field">基準日<input type="date" value={anchorAsOf} onChange={(event) => setAnchorAsOf(event.target.value)} /></label>
+          <label className="field"><span className="field-label">残高</span><input inputMode="numeric" type="number" step="1" value={anchorBalance} onChange={(event) => setAnchorBalance(event.target.value)} /></label>
+          <label className="field"><span className="field-label">基準日</span><input type="date" value={anchorAsOf} onChange={(event) => setAnchorAsOf(event.target.value)} /></label>
           <button onClick={() => saveAnchor.mutate()}>{saveAnchor.isPending ? "保存中" : "保存"}</button>
         </div>
       </section>
       <section className="card">
         <h2>予測期間</h2>
         <div className="inline-form">
-          <label className="field">表示月数 {materializeMonths}ヶ月<input type="range" min="1" max="36" value={materializeMonths} onChange={(event) => setMaterializeMonths(Number(event.target.value))} /></label>
+          <label className="field"><span className="field-label">表示月数 {materializeMonths}ヶ月</span><input type="range" min="1" max="36" value={materializeMonths} onChange={(event) => setMaterializeMonths(Number(event.target.value))} /></label>
           <button onClick={() => saveSettings.mutate(materializeMonths)}>{saveSettings.isPending ? "保存中" : "保存"}</button>
         </div>
       </section>

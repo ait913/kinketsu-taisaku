@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
+import { X } from "lucide-react";
 
 export type SheetProps = {
   open: boolean;
@@ -29,7 +30,7 @@ export function Sheet({ open, onDismiss, title, rightAction, dismissConfirm, chi
     <div data-testid="sheet-overlay" className="sheet-overlay" onClick={() => void dismiss()}>
       <section data-testid="sheet" className="sheet" onClick={(event) => event.stopPropagation()}>
         <header className="sheet-header">
-          <button data-testid="sheet-close" className="icon-button" onClick={() => void dismiss()} aria-label="閉じる">×</button>
+          <button data-testid="sheet-close" className="icon-button" onClick={() => void dismiss()} aria-label="閉じる"><X size={20} /></button>
           <h2>{title}</h2>
           {rightAction ? <button data-testid="sheet-action" onClick={rightAction.onClick}>{rightAction.label}</button> : <span />}
         </header>
