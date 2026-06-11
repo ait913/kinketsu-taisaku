@@ -33,7 +33,7 @@ export function LineChart({ series, xLabels, height, todayIndex }: LineChartProp
 
   return (
     <svg data-testid="line-chart" viewBox={`0 0 ${width} ${height}`} role="img" className="line-chart">
-      {todayIndex != null && <line x1={scaleX(todayIndex)} x2={scaleX(todayIndex)} y1="0" y2={height} stroke="#64748b" strokeDasharray="3 4" />}
+      {todayIndex != null && <line x1={scaleX(todayIndex)} x2={scaleX(todayIndex)} y1="0" y2={height} stroke="var(--color-text-muted)" strokeDasharray="3 4" />}
       {series.flatMap((s) => segments(s.points).map((segment, index) => (
         <polyline
           key={`${s.id}-${index}`}

@@ -135,9 +135,9 @@ export function SettingsView() {
   }
 
   return (
-    <section className="settings">
-      <h1>設定</h1>
-      {message && <p className="notice error">{message}</p>}
+    <section className="settings view-stack">
+      <header className="toolbar"><h1>設定</h1></header>
+      {message && <p className="notice error" data-testid="toast">{message}</p>}
       <section>
         <header className="section-header"><h2>カテゴリ管理</h2><button onClick={() => openCategory(null)}>＋追加</button></header>
         {categories.data?.map((cat) => <button className="setting-row row-link" key={cat.id} onClick={() => openCategory(cat)}><span>{cat.name}</span>{cat.isSystem && <span className="badge">システム</span>}</button>)}
@@ -147,7 +147,7 @@ export function SettingsView() {
         {categories.data?.map((category) => {
           const group = tags.data?.filter((tag) => tag.categoryId === category.id) ?? [];
           if (group.length === 0) return null;
-          return <div className="tag-group" key={category.id}><strong>{category.name}</strong>{group.map((tag) => <button className="setting-row row-link" key={tag.id} onClick={() => openTag(tag)}><span><span className="tag-pill" style={{ backgroundColor: tag.color ?? "#d1fae5" }} />{tag.name}</span></button>)}</div>;
+          return <div className="tag-group" key={category.id}><strong>{category.name}</strong>{group.map((tag) => <button className="setting-row row-link" key={tag.id} onClick={() => openTag(tag)}><span><span className="tag-pill" style={{ backgroundColor: tag.color ?? "var(--color-brand-soft)" }} />{tag.name}</span></button>)}</div>;
         })}
       </section>
       <section>

@@ -78,17 +78,28 @@ export function RecurringView() {
     return [`毎月${rule.dayOfMonth}日`, categoryName, tagName, rule.active ? "" : "停止中"].filter(Boolean).join(" ");
   }
 
+  function categoryTag(rule: RuleDTO) {
+    const categoryName = categories.data?.find((category) => category.id === rule.categoryId)?.name;
+    const tagName = tags.data?.find((tag) => tag.id === rule.tagId)?.name;
+    return [categoryName, tagName].filter(Boolean).join(" / ");
+  }
+
   return (
-    <section>
-      <header className="topbar"><strong>定期ルール</strong><button onClick={openNew}>＋追加</button></header>
-      {message && <p className="notice error">{message}</p>}
-      <div className="list">
+    <section className="view-stack">
+      <header className="toolbar"><h1>定期ルール</h1><button className="primary" onClick={openNew}>＋ 定期を追加</button></header>
+      {message && <p className="notice error" data-testid="toast">{message}</p>}
+      <div className="rule-list data-grid">
+        <div className="rule-head" aria-hidden="true"><span>ラベル</span><span>毎月</span><span>カテゴリ / タグ</span><span>金額</span><span>状態</span></div>
         {rules.data?.map((rule) => (
-          <button key={rule.id} className={`row-button ${rule.active ? "" : "muted"}`} onClick={() => openEdit(rule)}>
+          <button key={rule.id} className={`row-button rule-row ${rule.active ? "" : "muted"}`} onClick={() => openEdit(rule)}>
             <span className="row-main"><span className="row-title">{rule.label}</span><span className="row-meta">{ruleMeta(rule)}</span></span>
+            <span className="rule-day">毎月{rule.dayOfMonth}日</span>
+            <span className="rule-category">{categoryTag(rule)}</span>
             <span className={rule.signedAmount >= 0 ? "amount income" : "amount expense"}>{yen(rule.signedAmount)}</span>
+            <span className={rule.active ? "status-pill status-confirmed" : "status-pill status-muted"}>{rule.active ? "有効" : "停止中"}</span>
           </button>
         ))}
+        {rules.data && rules.data.length === 0 && <div data-testid="empty-rules" className="empty-state">定期ルールがまだありません</div>}
       </div>
       <RuleSheet
         open={sheetOpen}
