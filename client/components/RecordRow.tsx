@@ -11,7 +11,7 @@ export type RecordRowProps = {
 export function RecordRow({ record, tag, category, onClick }: RecordRowProps) {
   return (
     <button data-testid="record-row" className={`row-button record-row ${record.paid ? "" : "is-unpaid"}`} onClick={() => onClick(record.id)}>
-      <span className="tag-pill" style={{ backgroundColor: tag?.color ?? "var(--color-brand-soft)" }} />
+      <span className="tag-pill" style={{ backgroundColor: tag?.color ?? "var(--color-move)" }} />
       <span className="row-date">{record.date.slice(5)}</span>
       <span className="row-main">
         <span className="row-title">{record.description || category.name}</span>

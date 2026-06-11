@@ -20,7 +20,9 @@ export function BundleRow({ bundle, expanded, onToggle, children }: BundleRowPro
         </span>
         <span className={bundle.total >= 0 ? "amount income" : "amount expense"}>{yen(bundle.total)}</span>
       </button>
-      {expanded && children}
+      <div className={expanded ? "collapsible active" : "collapsible"}>
+        <div className="bundle-children">{children}</div>
+      </div>
     </div>
   );
 }

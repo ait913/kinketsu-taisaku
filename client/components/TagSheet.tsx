@@ -3,14 +3,12 @@ import type { CategoryDTO, TagDTO, TagInput } from "../api/types";
 import { Sheet } from "./Sheet";
 
 const palette = [
-  "var(--color-brand)",
-  "var(--color-success)",
-  "var(--color-info)",
-  "var(--color-warning)",
-  "var(--color-danger)",
+  "var(--color-income)",
+  "var(--color-move)",
+  "var(--color-expense)",
   "var(--color-text-muted)",
-  "var(--color-border-strong)",
-  "var(--color-border)",
+  "var(--blob-from)",
+  "var(--blob-to)",
 ];
 
 type TagSheetProps = {
