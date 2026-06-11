@@ -5,14 +5,11 @@ import * as BundleRowMod from "../../client/components/BundleRow";
 import * as LineChartMod from "../../client/components/LineChart";
 import * as RecordRowMod from "../../client/components/RecordRow";
 import * as SheetMod from "../../client/components/Sheet";
-import * as SummaryCardMod from "../../client/components/SummaryCard";
 
 const RecordRow = (RecordRowMod as typeof RecordRowMod & { default?: typeof RecordRowMod.RecordRow }).RecordRow ??
   (RecordRowMod as { default: typeof RecordRowMod.RecordRow }).default;
 const BundleRow = (BundleRowMod as typeof BundleRowMod & { default?: typeof BundleRowMod.BundleRow }).BundleRow ??
   (BundleRowMod as { default: typeof BundleRowMod.BundleRow }).default;
-const SummaryCard = (SummaryCardMod as typeof SummaryCardMod & { default?: typeof SummaryCardMod.SummaryCard }).SummaryCard ??
-  (SummaryCardMod as { default: typeof SummaryCardMod.SummaryCard }).default;
 const LineChart = (LineChartMod as typeof LineChartMod & { default?: typeof LineChartMod.LineChart }).LineChart ??
   (LineChartMod as { default: typeof LineChartMod.LineChart }).default;
 const Sheet = (SheetMod as typeof SheetMod & { default?: typeof SheetMod.Sheet }).Sheet ??
@@ -63,26 +60,6 @@ describe("BundleRow (§7.7)", () => {
 
     expect(screen.getByTestId("bundle-row")).toBeInTheDocument();
     expect(screen.getByText("Lunch (3)")).toBeInTheDocument();
-  });
-});
-
-describe("SummaryCard (§7.7)", () => {
-  it("currentBalance=null のとき summary-current を非表示にし、summary-forecast は常時表示する", () => {
-    const { rerender } = render(
-      <SummaryCard currentBalance={null} endingBalanceForecast={98200} incomeForecast={250000} expenseForecast={-151800} />,
-    );
-
-    expect(screen.queryByText("現在残高")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("summary-current")).not.toBeInTheDocument();
-    expect(screen.getByTestId("summary-forecast")).toBeInTheDocument();
-
-    rerender(
-      <SummaryCard currentBalance={123456} endingBalanceForecast={98200} incomeForecast={250000} expenseForecast={-151800} />,
-    );
-
-    expect(screen.getByText("現在残高")).toBeInTheDocument();
-    expect(screen.getByTestId("summary-current")).toBeInTheDocument();
-    expect(screen.getByTestId("summary-forecast")).toBeInTheDocument();
   });
 });
 

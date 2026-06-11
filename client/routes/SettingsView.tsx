@@ -1,9 +1,18 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { authClient } from "../api/auth";
 import { api } from "../api/client";
-import type { ApiErrorBody, CategoryDTO, CategoryInput, TagDTO, TagInput } from "../api/types";
+import type { ApiErrorBody, CategoryDTO, CategoryInput, RuleDTO, RuleInput, TagDTO, TagInput } from "../api/types";
 import { CategorySheet } from "../components/CategorySheet";
+import { ControlBar } from "../components/ControlBar";
+import { RuleSheet } from "../components/RuleSheet";
 import { TagSheet } from "../components/TagSheet";
+import { yen } from "../components/format";
+
+function currentYearMonth() {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit" }).format(new Date());
+}
 
 function errorMessage(error: unknown) {
   const body = error as ApiErrorBody;
@@ -15,8 +24,12 @@ function errorMessage(error: unknown) {
 }
 
 export function SettingsView() {
+  const navigate = useNavigate();
+  const session = authClient.useSession();
+  const [ruleSheetOpen, setRuleSheetOpen] = useState(false);
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
   const [tagSheetOpen, setTagSheetOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<RuleDTO | null>(null);
   const [editingCategory, setEditingCategory] = useState<CategoryDTO | null>(null);
   const [editingTag, setEditingTag] = useState<TagDTO | null>(null);
   const [anchorBalance, setAnchorBalance] = useState("0");
@@ -24,6 +37,7 @@ export function SettingsView() {
   const [materializeMonths, setMaterializeMonths] = useState(12);
   const [message, setMessage] = useState("");
   const queryClient = useQueryClient();
+  const rules = useQuery({ queryKey: ["recurring-rules"], queryFn: () => api<RuleDTO[]>("/api/recurring-rules") });
   const categories = useQuery({ queryKey: ["categories"], queryFn: () => api<CategoryDTO[]>("/api/categories") });
   const tags = useQuery({ queryKey: ["tags"], queryFn: () => api<TagDTO[]>("/api/tags") });
   const settings = useQuery({ queryKey: ["settings"], queryFn: () => api<{ materializeMonths: number }>("/api/settings") });
@@ -48,6 +62,38 @@ export function SettingsView() {
     void queryClient.invalidateQueries({ queryKey: ["forecast"] });
     void queryClient.invalidateQueries({ queryKey: ["recurring-rules"] });
   }
+
+  function invalidateRuleData() {
+    void queryClient.invalidateQueries({ queryKey: ["records"] });
+    void queryClient.invalidateQueries({ queryKey: ["month"] });
+    void queryClient.invalidateQueries({ queryKey: ["trend"] });
+    void queryClient.invalidateQueries({ queryKey: ["forecast"] });
+    void queryClient.invalidateQueries({ queryKey: ["recurring-rules"] });
+  }
+
+  const saveRule = useMutation({
+    mutationFn: (input: RuleInput) => editingRule
+      ? api<RuleDTO>(`/api/recurring-rules/${editingRule.id}`, { method: "PATCH", body: JSON.stringify(input) })
+      : api<RuleDTO>("/api/recurring-rules", { method: "POST", body: JSON.stringify(input) }),
+    onSuccess: () => {
+      setRuleSheetOpen(false);
+      setEditingRule(null);
+      setMessage("");
+      invalidateRuleData();
+    },
+    onError: (error) => setMessage(errorMessage(error)),
+  });
+
+  const deleteRule = useMutation({
+    mutationFn: ({ id, keepRecords }: { id: number; keepRecords: boolean }) => api<{ deleted: true; removedRecords: number }>(`/api/recurring-rules/${id}?keepRecords=${String(keepRecords)}`, { method: "DELETE" }),
+    onSuccess: () => {
+      setRuleSheetOpen(false);
+      setEditingRule(null);
+      setMessage("");
+      invalidateRuleData();
+    },
+    onError: (error) => setMessage(errorMessage(error)),
+  });
 
   const saveCategory = useMutation({
     mutationFn: (input: CategoryInput) => editingCategory
@@ -134,23 +180,56 @@ export function SettingsView() {
     setTagSheetOpen(true);
   }
 
+  function openRule(rule: RuleDTO | null) {
+    setEditingRule(rule);
+    setMessage("");
+    setRuleSheetOpen(true);
+  }
+
+  function confirmDeleteRule(ruleId: number, keepRecords: boolean) {
+    const label = keepRecords ? "未確定の予定だけ削除します。" : "この定期由来の全記録を削除します。";
+    if (window.confirm(label)) deleteRule.mutate({ id: ruleId, keepRecords });
+  }
+
+  function categoryTag(categoryId: number, tagId: number | null) {
+    const categoryName = categories.data?.find((category) => category.id === categoryId)?.name;
+    const tagName = tags.data?.find((tag) => tag.id === tagId)?.name;
+    return [categoryName, tagName].filter(Boolean).join(" / ");
+  }
+
   return (
-    <section className="settings view-stack">
-      <header className="toolbar"><h1>設定</h1></header>
+    <section className="settings home-stack">
+      <ControlBar variant="settings" onBack={() => void navigate({ to: "/" })} />
       {message && <p className="notice error" data-testid="toast">{message}</p>}
-      <section>
+      <section className="card">
+        <header className="section-header"><h2>定期ルール</h2><button className="soft-button press" onClick={() => openRule(null)}>＋追加</button></header>
+        <div className="soft-list">
+          {rules.data?.map((rule) => (
+            <button key={rule.id} className={`soft-row row-link ${rule.active ? "" : "is-unpaid"}`} onClick={() => openRule(rule)}>
+              <span className="row-main">
+                <span className="row-title">{rule.label}</span>
+                <span className="row-meta">毎月{rule.dayOfMonth}日 {categoryTag(rule.categoryId, rule.tagId)}</span>
+              </span>
+              <span className={rule.signedAmount >= 0 ? "amount income" : "amount expense"}>{yen(rule.signedAmount)}</span>
+              {!rule.active && <span className="status-pill status-muted">停止中</span>}
+            </button>
+          ))}
+          {rules.data && rules.data.length === 0 && <div data-testid="empty-rules" className="empty-state">定期ルールがまだありません</div>}
+        </div>
+      </section>
+      <section className="card">
         <header className="section-header"><h2>カテゴリ管理</h2><button onClick={() => openCategory(null)}>＋追加</button></header>
         {categories.data?.map((cat) => <button className="setting-row row-link" key={cat.id} onClick={() => openCategory(cat)}><span>{cat.name}</span>{cat.isSystem && <span className="badge">システム</span>}</button>)}
       </section>
-      <section>
+      <section className="card">
         <header className="section-header"><h2>タグ管理</h2><button onClick={() => openTag(null)}>＋追加</button></header>
         {categories.data?.map((category) => {
           const group = tags.data?.filter((tag) => tag.categoryId === category.id) ?? [];
           if (group.length === 0) return null;
-          return <div className="tag-group" key={category.id}><strong>{category.name}</strong>{group.map((tag) => <button className="setting-row row-link" key={tag.id} onClick={() => openTag(tag)}><span><span className="tag-pill" style={{ backgroundColor: tag.color ?? "var(--color-brand-soft)" }} />{tag.name}</span></button>)}</div>;
+          return <div className="tag-group" key={category.id}><strong>{category.name}</strong>{group.map((tag) => <button className="setting-row row-link" key={tag.id} onClick={() => openTag(tag)}><span><span className="tag-pill" style={{ backgroundColor: tag.color ?? "var(--color-move)" }} />{tag.name}</span></button>)}</div>;
         })}
       </section>
-      <section>
+      <section className="card">
         <h2>初期残高アンカー</h2>
         <div className="inline-form">
           <label className="field">残高<input inputMode="numeric" type="number" step="1" value={anchorBalance} onChange={(event) => setAnchorBalance(event.target.value)} /></label>
@@ -158,13 +237,32 @@ export function SettingsView() {
           <button onClick={() => saveAnchor.mutate()}>{saveAnchor.isPending ? "保存中" : "保存"}</button>
         </div>
       </section>
-      <section>
+      <section className="card">
         <h2>予測期間</h2>
         <div className="inline-form">
           <label className="field">表示月数 {materializeMonths}ヶ月<input type="range" min="1" max="36" value={materializeMonths} onChange={(event) => setMaterializeMonths(Number(event.target.value))} /></label>
           <button onClick={() => saveSettings.mutate(materializeMonths)}>{saveSettings.isPending ? "保存中" : "保存"}</button>
         </div>
       </section>
+      <section className="card">
+        <h2>アカウント</h2>
+        <div className="soft-row account-row">
+          <span>{session.data?.user.email}</span>
+          <button data-testid="settings-logout" className="danger-button" onClick={() => void authClient.signOut()}>ログアウト</button>
+        </div>
+      </section>
+      <RuleSheet
+        open={ruleSheetOpen}
+        rule={editingRule}
+        currentMonth={currentYearMonth()}
+        categories={categories.data ?? []}
+        tags={tags.data ?? []}
+        saving={saveRule.isPending}
+        deleting={deleteRule.isPending}
+        onDismiss={() => setRuleSheetOpen(false)}
+        onSave={(input) => saveRule.mutate(input)}
+        onDelete={confirmDeleteRule}
+      />
       <CategorySheet
         open={categorySheetOpen}
         category={editingCategory}
