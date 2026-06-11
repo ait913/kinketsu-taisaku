@@ -188,7 +188,7 @@
 
 ### 1.7 webfont
 
-`client/index.html` `<head>` に Noto Sans JP (本文) + Open Sans (`--font-num` 数値) を読み込む:
+リポジトリルートの `index.html` (Vite root) `<head>` に Noto Sans JP (本文) + Open Sans (`--font-num` 数値) を読み込む:
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -545,7 +545,7 @@ textarea:focus-visible, [role="radiogroup"] .segmented__option:focus-visible {
 
 | 対象 | 内容 |
 |---|---|
-| `client/index.html` | Open Sans webfont link 追加 (`--font-num`) |
+| `index.html` (repo ルート、Vite root) | Open Sans webfont link 追加 (`--font-num`) |
 | `client/styles.css` | `--font-num` 追加、金額系 (`.hero-ending` `.row-amount` `.year-summary strong` `.total-card strong`) に `font-family: var(--font-num)` 適用。label を muted+xs、section 見出しを md+medium に統一 (§4 レイヤー表通り) |
 | 各 `*.tsx` | フォーム label を `.field-label` (muted xs) に。残高以外で `--text-hero` を使わない |
 
