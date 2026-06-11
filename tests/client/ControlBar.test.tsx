@@ -76,7 +76,8 @@ describe("ControlBar (§9.1, §11.1, §11.2)", () => {
     render(<ControlBar variant="settings" onBack={onBack} />);
 
     expect(screen.getByTestId("control-bar")).toBeInTheDocument();
-    expect(screen.getByTestId("control-back")).toHaveTextContent("‹ 戻る");
+    expect(screen.getByTestId("control-back")).toHaveTextContent("戻る");
+    expect(screen.getByTestId("control-back")).not.toHaveTextContent("‹");
     expect(screen.getByText("設定")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("control-back"));
