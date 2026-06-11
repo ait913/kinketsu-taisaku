@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CategoryDTO, RuleDTO, RuleInput, TagDTO } from "../api/types";
+import { SegmentedControl } from "./SegmentedControl";
 import { Sheet } from "./Sheet";
 
 type RuleSheetProps = {
@@ -41,6 +42,7 @@ export function RuleSheet({ open, rule, currentMonth, categories, tags, saving, 
   }, [currentMonth, firstCategoryId, open, rule]);
 
   const selectableTags = useMemo(() => tags.filter((tag) => tag.categoryId === categoryId), [categoryId, tags]);
+  const tagSegmentValue = tagId || "none";
 
   function submit() {
     onSave({
@@ -63,20 +65,45 @@ export function RuleSheet({ open, rule, currentMonth, categories, tags, saving, 
   return (
     <Sheet open={open} onDismiss={onDismiss} title={rule ? "定期を編集" : "定期を追加"} rightAction={{ label: saving ? "保存中" : "保存", onClick: submit }}>
       <div className="sheet-body">
-        <label className="field">ルール名<input value={label} maxLength={60} onChange={(event) => setLabel(event.target.value)} /></label>
-        <label className="field">毎月<input type="number" min="1" max="31" step="1" value={dayOfMonth} onChange={(event) => setDayOfMonth(Number(event.target.value))} /></label>
-        <label className="field">金額<input inputMode="numeric" type="number" step="1" value={amount} onChange={(event) => setAmount(event.target.value)} /></label>
-        <label className="field">カテゴリ<select value={categoryId} onChange={(event) => { setCategoryId(Number(event.target.value)); setTagId(""); }}>
-          {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-        </select></label>
-        <label className="field">タグ<select value={tagId} onChange={(event) => setTagId(event.target.value)}>
-          <option value="">未指定</option>
-          {selectableTags.map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
-        </select></label>
-        <label className="field">説明<input value={description} maxLength={200} onChange={(event) => setDescription(event.target.value)} /></label>
-        <label className="field">開始月<input type="month" value={startMonth} onChange={(event) => setStartMonth(event.target.value)} /></label>
-        <label className="field">終了月<input type="month" value={endMonth} onChange={(event) => setEndMonth(event.target.value)} /></label>
-        <label className="check-field"><input type="checkbox" checked={active} onChange={(event) => setActive(event.target.checked)} />有効</label>
+        <label className="field"><span className="field-label">ルール名</span><input value={label} maxLength={60} onChange={(event) => setLabel(event.target.value)} /></label>
+        <label className="field"><span className="field-label">毎月</span><input type="number" min="1" max="31" step="1" value={dayOfMonth} onChange={(event) => setDayOfMonth(Number(event.target.value))} /></label>
+        <label className="field"><span className="field-label">金額</span><input inputMode="numeric" type="number" step="1" value={amount} onChange={(event) => setAmount(event.target.value)} /></label>
+        <div className="field">
+          <span className="field-label">カテゴリ</span>
+          <SegmentedControl
+            field="category"
+            value={categoryId}
+            options={categories.map((category) => ({ value: category.id, label: category.name, testId: `segment-category-${category.id}` }))}
+            onChange={(nextCategoryId) => { setCategoryId(nextCategoryId); setTagId(""); }}
+          />
+        </div>
+        <div className="field">
+          <span className="field-label">タグ</span>
+          <SegmentedControl
+            field="tag"
+            value={tagSegmentValue}
+            options={[
+              { value: "none", label: "未指定", testId: "segment-tag-none" },
+              ...selectableTags.map((tag) => ({ value: String(tag.id), label: tag.name, testId: `segment-tag-${tag.id}` })),
+            ]}
+            onChange={(nextTagId) => setTagId(nextTagId === "none" ? "" : nextTagId)}
+          />
+        </div>
+        <label className="field"><span className="field-label">説明</span><input value={description} maxLength={200} onChange={(event) => setDescription(event.target.value)} /></label>
+        <label className="field"><span className="field-label">開始月</span><input type="month" value={startMonth} onChange={(event) => setStartMonth(event.target.value)} /></label>
+        <label className="field"><span className="field-label">終了月</span><input type="month" value={endMonth} onChange={(event) => setEndMonth(event.target.value)} /></label>
+        <div className="field">
+          <span className="field-label">状態</span>
+          <SegmentedControl
+            field="active"
+            value={active ? "active" : "inactive"}
+            options={[
+              { value: "active", label: "有効", testId: "segment-active-active" },
+              { value: "inactive", label: "停止", testId: "segment-active-inactive" },
+            ]}
+            onChange={(nextActive) => setActive(nextActive === "active")}
+          />
+        </div>
         {rule && (
           <div className="delete-group">
             <button className="danger-button" type="button" disabled={deleting} onClick={() => deleteRule(true)}>予定だけ消す</button>

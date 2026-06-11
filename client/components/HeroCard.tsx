@@ -1,4 +1,5 @@
 import { yen } from "./format";
+import { Plus } from "lucide-react";
 
 export type HeroCardProps = {
   endingBalanceForecast: number;
@@ -17,7 +18,7 @@ export function HeroCard({ endingBalanceForecast, currentBalance, netForecast, o
         {currentBalance !== null && <span data-testid="hero-current">現在 {yen(currentBalance)}</span>}
         <span data-testid="hero-net" className={netForecast >= 0 ? "income amount" : "expense amount"}>収支 {yen(netForecast)}</span>
       </div>
-      <button data-testid="hero-add" className="hero-add press press--lg" onClick={onAddRecord}>✎ 入力する</button>
+      <button data-testid="hero-add" className="hero-add press press--lg" onClick={onAddRecord}><Plus size={20} />入力する</button>
     </section>
   );
 }

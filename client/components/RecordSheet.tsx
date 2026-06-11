@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CategoryDTO, RecordDTO, RecordInput, TagDTO } from "../api/types";
+import { SegmentedControl } from "./SegmentedControl";
 import { Sheet } from "./Sheet";
 
 type RecordSheetProps = {
@@ -39,6 +40,7 @@ export function RecordSheet({ open, record, yearMonth, categories, tags, saving,
   }, [firstCategoryId, open, record, yearMonth]);
 
   const selectableTags = useMemo(() => tags.filter((tag) => tag.categoryId === categoryId), [categoryId, tags]);
+  const tagSegmentValue = tagId || "none";
 
   function submit() {
     onSave({
@@ -54,17 +56,42 @@ export function RecordSheet({ open, record, yearMonth, categories, tags, saving,
   return (
     <Sheet open={open} onDismiss={onDismiss} title={record ? "記録を編集" : "記録を追加"} rightAction={{ label: saving ? "保存中" : "保存", onClick: submit }}>
       <div className="sheet-body">
-        <label className="field">日付<input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
-        <label className="field">金額<input inputMode="numeric" type="number" step="1" value={amount} onChange={(event) => setAmount(event.target.value)} /></label>
-        <label className="field">カテゴリ<select value={categoryId} onChange={(event) => { setCategoryId(Number(event.target.value)); setTagId(""); }}>
-          {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-        </select></label>
-        <label className="field">タグ<select value={tagId} onChange={(event) => setTagId(event.target.value)}>
-          <option value="">未指定</option>
-          {selectableTags.map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
-        </select></label>
-        <label className="field">説明<input value={description} maxLength={200} onChange={(event) => setDescription(event.target.value)} /></label>
-        <label className="check-field"><input type="checkbox" checked={paid} onChange={(event) => setPaid(event.target.checked)} />確定</label>
+        <label className="field"><span className="field-label">日付</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
+        <label className="field"><span className="field-label">金額</span><input inputMode="numeric" type="number" step="1" value={amount} onChange={(event) => setAmount(event.target.value)} /></label>
+        <div className="field">
+          <span className="field-label">カテゴリ</span>
+          <SegmentedControl
+            field="category"
+            value={categoryId}
+            options={categories.map((category) => ({ value: category.id, label: category.name, testId: `segment-category-${category.id}` }))}
+            onChange={(nextCategoryId) => { setCategoryId(nextCategoryId); setTagId(""); }}
+          />
+        </div>
+        <div className="field">
+          <span className="field-label">タグ</span>
+          <SegmentedControl
+            field="tag"
+            value={tagSegmentValue}
+            options={[
+              { value: "none", label: "未指定", testId: "segment-tag-none" },
+              ...selectableTags.map((tag) => ({ value: String(tag.id), label: tag.name, testId: `segment-tag-${tag.id}` })),
+            ]}
+            onChange={(nextTagId) => setTagId(nextTagId === "none" ? "" : nextTagId)}
+          />
+        </div>
+        <label className="field"><span className="field-label">説明</span><input value={description} maxLength={200} onChange={(event) => setDescription(event.target.value)} /></label>
+        <div className="field">
+          <span className="field-label">状態</span>
+          <SegmentedControl
+            field="paid"
+            value={paid ? "paid" : "not"}
+            options={[
+              { value: "paid", label: "確定", testId: "segment-paid-paid" },
+              { value: "not", label: "未確定", testId: "segment-paid-not" },
+            ]}
+            onChange={(nextPaid) => setPaid(nextPaid === "paid")}
+          />
+        </div>
         {record && <button className="danger-button" type="button" disabled={deleting} onClick={() => onDelete(record.id)}>{deleting ? "削除中" : "削除"}</button>}
       </div>
     </Sheet>

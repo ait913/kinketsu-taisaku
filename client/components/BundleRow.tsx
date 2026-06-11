@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { BundleDTO } from "../api/types";
 import { yen } from "./format";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export type BundleRowProps = {
   bundle: BundleDTO;
@@ -13,7 +14,7 @@ export function BundleRow({ bundle, expanded, onToggle, children }: BundleRowPro
   return (
     <div className="bundle-group">
       <button data-testid="bundle-row" className="row-button bundle-row" onClick={() => onToggle(bundle.description)}>
-        <span className="bundle-caret">{expanded ? "▾" : "▸"}</span>
+        <span className="bundle-caret">{expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span>
         <span className="row-main">
           <span className="row-title">{bundle.description} ({bundle.count})</span>
           <span className="row-meta">bundle</span>

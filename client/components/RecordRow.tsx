@@ -1,5 +1,6 @@
 import type { CategoryDTO, RecordDTO, TagDTO } from "../api/types";
 import { yen } from "./format";
+import { Circle } from "lucide-react";
 
 export type RecordRowProps = {
   record: RecordDTO;
@@ -18,7 +19,7 @@ export function RecordRow({ record, tag, category, onClick }: RecordRowProps) {
         <span className="row-meta">{category.name}{tag ? ` / ${tag.name}` : ""}</span>
       </span>
       <span className={record.paid ? "status-pill status-confirmed" : "status-pill status-planned"}>{record.paid ? "確定" : "予定"}</span>
-      {!record.paid && <span data-testid="record-unpaid-mark" className="unpaid-mark">●</span>}
+      {!record.paid && <span data-testid="record-unpaid-mark" className="unpaid-mark"><Circle size={8} fill="currentColor" /></span>}
       <span data-testid="record-amount" className={record.signedAmount >= 0 ? "amount income" : "amount expense"}>{yen(record.signedAmount)}</span>
     </button>
   );

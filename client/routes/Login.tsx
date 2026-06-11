@@ -10,7 +10,7 @@ export function Login() {
       <section className="login-panel">
         <h1>金欠対策</h1>
         <label>
-          メール
+          <span className="field-label">メール</span>
           <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
         </label>
         <button onClick={async () => {

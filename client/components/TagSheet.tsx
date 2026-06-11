@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CategoryDTO, TagDTO, TagInput } from "../api/types";
+import { SegmentedControl } from "./SegmentedControl";
 import { Sheet } from "./Sheet";
 
 const palette = [
@@ -38,11 +39,17 @@ export function TagSheet({ open, tag, categories, saving, deleting, onDismiss, o
   return (
     <Sheet open={open} onDismiss={onDismiss} title={tag ? "タグを編集" : "タグを追加"} rightAction={{ label: saving ? "保存中" : "保存", onClick: () => onSave({ categoryId, name, color }) }}>
       <div className="sheet-body">
-        <label className="field">カテゴリ<select value={categoryId} onChange={(event) => setCategoryId(Number(event.target.value))}>
-          {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-        </select></label>
-        <label className="field">名前<input value={name} maxLength={40} onChange={(event) => setName(event.target.value)} /></label>
-        <div className="field"><span>色</span><div className="palette">
+        <div className="field">
+          <span className="field-label">カテゴリ</span>
+          <SegmentedControl
+            field="category"
+            value={categoryId}
+            options={categories.map((category) => ({ value: category.id, label: category.name, testId: `segment-category-${category.id}` }))}
+            onChange={setCategoryId}
+          />
+        </div>
+        <label className="field"><span className="field-label">名前</span><input value={name} maxLength={40} onChange={(event) => setName(event.target.value)} /></label>
+        <div className="field"><span className="field-label">色</span><div className="palette">
           <button type="button" className={color === null ? "swatch active" : "swatch"} onClick={() => setColor(null)}>なし</button>
           {palette.map((swatch) => <button key={swatch} type="button" aria-label={swatch} className={color === swatch ? "swatch active" : "swatch"} style={{ backgroundColor: swatch }} onClick={() => setColor(swatch)} />)}
         </div></div>

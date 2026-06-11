@@ -1,5 +1,6 @@
 import type { CategoryDTO, GroupCategoryTotal, GroupTagTotal, TagDTO } from "../api/types";
 import { yen } from "./format";
+import { X } from "lucide-react";
 
 export type ChipFilterTarget = { kind: "tag"; tagId: number } | { kind: "category"; categoryId: number } | null;
 
@@ -70,7 +71,7 @@ export function CategoryTagChips({ byTag, byCategory, tags, categories, selected
             <span className="choice-bar" style={{ backgroundColor: selectedColor }} />
             <strong>{selectedName}</strong>
             <span className={(selectedTotal ?? 0) >= 0 ? "amount income" : "amount expense"}>{yen(selectedTotal ?? 0)}</span>
-            <button data-testid="chip-clear" className="chip-clear press" onClick={() => onSelect(null)} aria-label="解除">×</button>
+            <button data-testid="chip-clear" className="chip-clear press" onClick={() => onSelect(null)} aria-label="解除"><X size={16} /></button>
           </div>
         </div>
       </div>
