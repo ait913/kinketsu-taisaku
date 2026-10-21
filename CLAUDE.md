@@ -72,9 +72,11 @@ npx vitest run         # Vitest 4。tests/ (API/描画) + src/**/__tests__ (純�
 
 main へ push 後、Coolify API で deploy をキック (auto-deploy webhook 未設定):
 ```
-curl -sS -H "Authorization: Bearer $COOLIFY_API_TOKEN" \
+curl -sS -X POST -H "Authorization: Bearer $COOLIFY_API_TOKEN" \
   "$COOLIFY_API_BASE/deploy?uuid=s4b61u855k6uqazep1brr00z&force=false"
 ```
+(`/deploy` は 2026-10 から POST 専用。GET は 405)
+- 既知の失敗テスト台帳: `.knowledge/known-failures.md` (2026-10-22 新設。vitest の基線は 5 件失敗、全件「環境依存 (時刻)」= テストが 2026-06/07 固定月)
 - 単一コンテナ (Dockerfile)。Hono が API + 静的 client (`SERVE_STATIC=1`) を :8080 で配信。起動時に drizzle migration 自動適用。
 - **新規/再作成時は必ず `is_force_https_enabled=false` + `redirect:both`**。それでも全パス 307 self-loop なら **fqdn 削除→redeploy(404確認)→戻し→redeploy** で Traefik label 再生成 ([[gotcha/coolify-traefik-stale-label-loop]])。今回これで復旧。
 
