@@ -12,5 +12,6 @@ COPY package*.json .npmrc ./
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/drizzle ./drizzle
+USER node
 EXPOSE 8080
 CMD ["node", "dist/index.js"]
